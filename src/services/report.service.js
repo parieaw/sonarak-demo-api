@@ -6,7 +6,7 @@ async function salesSummary() {
 }
 
 // This one has a bug on purpose: an order whose product was removed has no `product`, and reading
-// `.name` of it throws. The error handler logs the stack and answers 500. Send it from Sonar with the
+// `.name` of it throws. The error handler logs the stack and answers 500. Send it from Sonarak with the
 // server started in the Server panel to see the stack trace next to the response.
 async function dailyReport() {
   const lines = db.orders.map((order) => {

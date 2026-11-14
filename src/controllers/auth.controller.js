@@ -42,7 +42,7 @@ module.exports.auth = {
     const state = crypto.randomBytes(12).toString('hex');
     res.setHeader('Set-Cookie', `demo_oauth_state=${state}; ${COOKIE}; Max-Age=600`);
     const url = new URL('/oauth/authorize', config.baseUrl);
-    url.searchParams.set('client_id', 'sonar-demo');
+    url.searchParams.set('client_id', 'sonarak-demo');
     url.searchParams.set('redirect_uri', `${config.baseUrl}/api/auth/oauth/callback`);
     url.searchParams.set('response_type', 'code');
     url.searchParams.set('state', state);

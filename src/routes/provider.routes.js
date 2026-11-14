@@ -30,7 +30,7 @@ router.get('/oauth/continue', (req, res) => {
 
 router.get('/signed-in', (req, res) => {
   const user = db.users.find((u) => u.id === db.sessions.get(req.cookies.demo_session));
-  res.send(page(user ? `<h2>Signed in as ${esc(user.name)}</h2><p>This browser now has the <code>demo_session</code> cookie. To use it in Sonar, copy its value from the developer tools (Application › Cookies) and add it in Sonar's Auth tab.</p>` : '<h2>Not signed in</h2><p><a href="/api/auth/oauth">Sign in</a></p>'));
+  res.send(page(user ? `<h2>Signed in as ${esc(user.name)}</h2><p>This browser now has the <code>demo_session</code> cookie. To use it in Sonarak, copy its value from the developer tools (Application › Cookies) and add it in Sonarak's Auth tab.</p>` : '<h2>Not signed in</h2><p><a href="/api/auth/oauth">Sign in</a></p>'));
 });
 
 module.exports = router;

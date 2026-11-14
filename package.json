@@ -1,8 +1,8 @@
 {
-  "name": "sonar-demo-api",
+  "name": "sonarak-demo-api",
   "version": "1.0.0",
   "private": true,
-  "description": "A small API with a bit of everything, to try Sonar on: three ways to sign in, roles, validation, uploads, an error envelope, a route that crashes, and a .env to check.",
+  "description": "A small API with a bit of everything, to try Sonarak on: three ways to sign in, roles, validation, uploads, an error envelope, a route that crashes, and a .env to check.",
   "license": "MIT",
   "main": "src/server.js",
   "scripts": {
