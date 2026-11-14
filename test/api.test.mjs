@@ -1,5 +1,5 @@
 // npm test
-// Starts the API on a free port and walks through everything it offers. Also a list of what to try in Sonar.
+// Starts the API on a free port and walks through everything it offers. Also a list of what to try in Sonarak.
 import test, { before, after } from "node:test";
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";
@@ -17,7 +17,7 @@ before(async () => {
 });
 after(() => server.close());
 
-/** A client with its own cookie jar, like one browser or one Sonar environment */
+/** A client with its own cookie jar, like one browser or one Sonarak environment */
 function client() {
   const jar = new Map();
   const call = async (method, path, { body, headers = {}, form, raw } = {}) => {
@@ -167,7 +167,7 @@ test("signing in through the provider: a redirect a browser follows to the end",
   assert.equal(start.status, 307);
   const to = new URL(start.location);
   assert.equal(to.pathname, "/oauth/authorize");
-  assert.deepEqual([to.searchParams.get("client_id"), to.searchParams.get("response_type")], ["sonar-demo", "code"]);
+  assert.deepEqual([to.searchParams.get("client_id"), to.searchParams.get("response_type")], ["sonarak-demo", "code"]);
   assert.ok(browser.jar.has("demo_oauth_state"));
   // the provider's page, then the choice of account
   const picker = await browser.get(to.pathname + to.search);

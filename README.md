@@ -1,8 +1,8 @@
-# sonar-demo-api
+# sonarak-demo-api
 
-A small API with a bit of everything, made to try [Sonar](https://sonar.parieaw.cloud) on. It runs on any machine with Node 20 or later: no database, no accounts, no network. The data is kept in memory and is the same every time the server starts.
+A small API with a bit of everything, made to try [Sonarak](https://sonarak.parieaw.cloud) on. It runs on any machine with Node 20 or later: no database, no accounts, no network. The data is kept in memory and is the same every time the server starts.
 
-It is a pretend café: people sign in, look at the menu, place orders. What matters is that it does each thing a real backend does in a way you can see in Sonar.
+It is a pretend café: people sign in, look at the menu, place orders. What matters is that it does each thing a real backend does in a way you can see in Sonarak.
 
 ## Run it
 
@@ -14,7 +14,7 @@ npm install
 npm run dev
 ```
 
-It listens on `http://localhost:4100`. In Sonar: **Add project**, pick this folder, and set the environment's base URL to `http://localhost:4100`. Or start it from Sonar's Server panel, which also shows its log.
+It listens on `http://localhost:4100`. In Sonarak: **Add project**, pick this folder, and set the environment's base URL to `http://localhost:4100`. Or start it from Sonarak's Server panel, which also shows its log.
 
 Three accounts, all with the password `demo1234`:
 
@@ -24,20 +24,20 @@ Three accounts, all with the password `demo1234`:
 | `staff@demo.test` | staff | read and place orders |
 | `guest@demo.test` | guest | read their own orders |
 
-## Things to try in Sonar
+## Things to try in Sonarak
 
 1. **Routes from the code.** 22 routes appear with no setup. Open `POST /api/orders`: the body is filled in from the validation rules (`items` is one to ten, `quantity` is 1 to 20).
-2. **Sign in once.** Send `POST /api/auth/login`. Sonar keeps the session cookie and the `accessToken`. `GET /api/auth/me` now works, and so does the admin area, which reads the token.
-3. **CSRF without thinking about it.** `POST /api/orders` needs an `x-csrf-token` header that matches a cookie. Sonar fetches it from `/api/auth/csrf` and adds it.
+2. **Sign in once.** Send `POST /api/auth/login`. Sonarak keeps the session cookie and the `accessToken`. `GET /api/auth/me` now works, and so does the admin area, which reads the token.
+3. **CSRF without thinking about it.** `POST /api/orders` needs an `x-csrf-token` header that matches a cookie. Sonarak fetches it from `/api/auth/csrf` and adds it.
 4. **An error, traced to its line.** Sign out and send `GET /api/orders`: 401, with the line in `src/middlewares/auth.js` that sent it.
-5. **HTTP status and business status.** Order a `p_scone` (out of stock): the answer is HTTP 200 with `{ "status": false, "msg": "OUT_OF_STOCK" }`. Sonar shows the two results apart.
+5. **HTTP status and business status.** Order a `p_scone` (out of stock): the answer is HTTP 200 with `{ "status": false, "msg": "OUT_OF_STOCK" }`. Sonarak shows the two results apart.
 6. **A crash, with its stack trace.** Start the server from the Server panel, sign in as the admin, send `GET /api/admin/reports/daily`. It answers 500, and the card shows the `TypeError` from `src/services/report.service.js`.
 7. **Roles.** Record a flow (log in, list orders, open the admin users), give it the roles admin, staff and guest under **Run as**, and run it: one column per role.
 8. **A file upload.** `POST /api/products/:id/image` is multipart, with the file in `image`.
-9. **A sign-in that needs a browser.** `GET /api/auth/oauth` answers with a redirect to a pretend provider, the way "Sign in with Google" does. Sonar explains it and offers the two steps.
+9. **A sign-in that needs a browser.** `GET /api/auth/oauth` answers with a redirect to a pretend provider, the way "Sign in with Google" does. Sonarak explains it and offers the two steps.
 10. **Check .env.** In the Server panel: three variables the code reads are not set (one of them, `FEATURE_REFUNDS`, is not even in `.env.example`), and one in the example is read nowhere. Each shows who added it.
 11. **Compare branches.** Compare with `feature/refunds`: one new route, and changes to two others.
-12. **From an AI agent.** With MCP on in Sonar, ask Claude Code "which routes need the admin role?" or "why did my last request to /api/admin/reports/daily fail?".
+12. **From an AI agent.** With MCP on in Sonarak, ask Claude Code "which routes need the admin role?" or "why did my last request to /api/admin/reports/daily fail?".
 
 ## What is where
 
