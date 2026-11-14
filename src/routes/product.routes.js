@@ -3,12 +3,24 @@ const path = require('path');
 const multer = require('multer');
 const db = require('../db');
 const messages = require('../utils/messages');
-const { BusinessError, NotFoundError } = require('../utils/errors');
+const { BusinessError, BadRequestError, NotFoundError } = require('../utils/errors');
 const { requireSession, requireCsrf, requirePermission } = require('../middlewares/auth');
 const { asyncHandler } = require('../middlewares/async.handler');
 
 const router = express.Router();
-const upload = multer({ dest: path.join(__dirname, '..', '..', 'uploads'), limits: { fileSize: 2 * 1024 * 1024 } });
+const upload = multer({
+  dest: path.join(__dirname, '..', '..', 'uploads'),
+  limits: { fileSize: 2 * 1024 * 1024 },
+  // pictures only: anything else is refused before it is written to disk
+  fileFilter: (req, file, done) => (file.mimetype.startsWith('image/') ? done(null, true) : done(new BadRequestError(messages.IMAGE_TYPE_NOT_ALLOWED))),
+});
+
+// The product has to exist before the upload is read, so no file is saved for one that does not
+const findProduct = (req, res, next) => {
+  res.locals.product = db.products.find((p) => p.id === req.params.id);
+  if (!res.locals.product) return next(new NotFoundError(messages.PRODUCT_NOT_FOUND));
+  next();
+};
 
 // The menu: open to everyone, no sign-in
 router.get('/', (req, res) => {
@@ -23,10 +35,10 @@ router.post(
   requireSession,
   requireCsrf,
   requirePermission('products.write'),
+  findProduct,
   upload.single('image'),
-  asyncHandler(async (req) => {
-    const product = db.products.find((p) => p.id === req.params.id);
-    if (!product) throw new NotFoundError(messages.PRODUCT_NOT_FOUND);
+  asyncHandler(async (req, res) => {
+    const { product } = res.locals;
     if (!req.file) throw new BusinessError(messages.IMAGE_REQUIRED);
     product.image = req.file.filename;
     return { result: { id: product.id, image: req.file.filename, size: req.file.size, caption: req.body.caption ?? '' } };

@@ -188,3 +188,57 @@ test("signing in through the provider: a redirect a browser follows to the end",
   // and the provider only sends people back to this app
   assert.equal((await browser.get("/oauth/continue?as=u_admin&redirect_uri=https%3A%2F%2Fevil.example%2Fcb&state=x")).status, 400);
 });
+
+test("signing out ends the token too, and emails are not case-sensitive", async () => {
+  const admin = await signedIn("admin@demo.test");
+  const bearer = { headers: { authorization: `Bearer ${admin.token}` } };
+  assert.equal((await admin.get("/api/admin/users", bearer)).status, 200);
+  await admin.post("/api/auth/logout");
+  assert.equal((await admin.get("/api/admin/users", bearer)).status, 401);
+  const mixed = await client().post("/api/auth/login", { body: { email: "Admin@Demo.test", password: "demo1234" } });
+  assert.equal(mixed.json.msg, "SUCCESS");
+});
+
+test("stock: lines of the same product add up, a cancel gives it back, and only the owner or an admin changes an order", async () => {
+  const staff = await signedIn("staff@demo.test");
+  const stock = async (id) => (await client().get("/api/products")).json.result.items.find((p) => p.id === id).stock;
+  const mocha = await stock("p_mocha");
+  const twice = await staff.post("/api/orders", { body: { items: [{ productId: "p_mocha", quantity: mocha }, { productId: "p_mocha", quantity: 1 }] }, headers: staff.csrf });
+  assert.deepEqual(twice.json, { status: false, msg: "OUT_OF_STOCK" });
+  assert.equal(await stock("p_mocha"), mocha);
+
+  const latte = await stock("p_latte");
+  const id = (await staff.post("/api/orders", { body: { items: [{ productId: "p_latte", quantity: 3 }] }, headers: staff.csrf })).json.result.id;
+  assert.equal(await stock("p_latte"), latte - 3);
+  assert.equal((await staff.del(`/api/orders/${id}`, { headers: staff.csrf })).json.result.status, "cancelled");
+  assert.equal(await stock("p_latte"), latte);
+  assert.deepEqual((await staff.del(`/api/orders/${id}`, { headers: staff.csrf })).json, { status: false, msg: "ORDER_CANCELLED" });
+
+  // o_1003 is the admin's: staff may read it but not change it
+  assert.equal((await staff.get("/api/orders/o_1003")).status, 200);
+  assert.deepEqual([(await staff.del("/api/orders/o_1003", { headers: staff.csrf })).status], [403]);
+  assert.equal((await staff.post("/api/orders/o_1003/pay", { headers: staff.csrf })).status, 403);
+});
+
+test("bad requests answer 4xx, not 500", async () => {
+  const c = client();
+  const json = await c.post("/api/auth/login", { raw: '{"email":', headers: { "content-type": "application/json" } });
+  assert.deepEqual([json.status, json.json.msg], [400, "INVALID_JSON"]);
+  assert.equal((await c.get("/api/auth/me", { headers: { cookie: "demo_session=%E0%A4%A" } })).status, 401);
+  const missing = await c.get("/api/nope");
+  assert.deepEqual([missing.status, missing.json], [404, { status: false, msg: "ROUTE_NOT_FOUND" }]);
+  assert.deepEqual((await c.post("/api/feedback", { form: { message: "x", rating: "9" } })).json, { status: false, msg: "RATING_OUT_OF_RANGE" });
+  assert.equal((await c.post("/api/feedback", { form: { message: "x" } })).json.result.rating, null);
+
+  const admin = await signedIn("admin@demo.test");
+  const file = (bytes, type, name) => {
+    const f = new FormData();
+    f.set("image", new Blob([bytes], { type }), name);
+    return f;
+  };
+  const big = await admin.post("/api/products/p_latte/image", { raw: file(new Uint8Array(3 * 1024 * 1024), "image/png", "big.png"), headers: admin.csrf });
+  assert.deepEqual([big.status, big.json.msg], [413, "FILE_TOO_LARGE"]);
+  const txt = await admin.post("/api/products/p_latte/image", { raw: file("hello", "text/plain", "a.txt"), headers: admin.csrf });
+  assert.deepEqual([txt.status, txt.json.msg], [400, "IMAGE_TYPE_NOT_ALLOWED"]);
+  assert.equal((await admin.post("/api/products/p_nope/image", { raw: file("x", "image/png", "a.png"), headers: admin.csrf })).status, 404);
+});

@@ -23,10 +23,12 @@ const feedback = [];
 const sessions = new Map();
 /** bearer token → user id */
 const tokens = new Map();
+/** session id → the bearer token issued with it, so signing out ends both */
+const sessionTokens = new Map();
 /** one-time code from the pretend sign-in provider → user id */
 const oauthCodes = new Map();
 
 let seq = 1003;
 const nextOrderId = () => `o_${++seq}`;
 
-module.exports = { users, products, orders, feedback, sessions, tokens, oauthCodes, nextOrderId };
+module.exports = { users, products, orders, feedback, sessions, tokens, sessionTokens, oauthCodes, nextOrderId };
