@@ -1,0 +1,19 @@
+{
+  "name": "sonar-demo-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A small API with a bit of everything, to try Sonar on: three ways to sign in, roles, validation, uploads, an error envelope, a route that crashes, and a .env to check.",
+  "license": "MIT",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "test": "node --test test/*.test.mjs"
+  },
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "express": "^4.21.2",
+    "express-validator": "^7.2.1",
+    "multer": "^2.0.2"
+  }
+}
