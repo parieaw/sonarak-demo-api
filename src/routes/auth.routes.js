@@ -14,6 +14,12 @@ const router = express.Router();
  *     summary: Sign in with an email and a password
  *     description: Sets the session cookie and returns an access token. Use either one afterwards. The demo accounts are admin@demo.test, staff@demo.test and guest@demo.test, all with the password demo1234.
  *     tags: [auth]
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           example:
+ *             email: admin@demo.test
+ *             password: demo1234
  */
 router.post('/login', body('email').isEmail().withMessage('must be an email'), body('password').isString().isLength({ min: 4 }), validate, auth.login);
 
