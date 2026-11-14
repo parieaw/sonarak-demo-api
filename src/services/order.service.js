@@ -1,3 +1,4 @@
+const config = require('../config');
 const db = require('../db');
 const messages = require('../utils/messages');
 const { BusinessError, NotFoundError, ForbiddenError } = require('../utils/errors');
@@ -18,7 +19,7 @@ async function listOrders({ user, status, page, limit }) {
   const mine = user.role === 'guest' ? db.orders.filter((o) => o.userId === user.id) : db.orders;
   const matching = status ? mine.filter((o) => o.status === status) : mine;
   const start = (page - 1) * limit;
-  return { items: matching.slice(start, start + limit), page, limit, total: matching.length };
+  return { items: matching.slice(start, start + limit), page, limit, total: matching.length, hasMore: start + limit < matching.length };
 }
 
 async function findOrder(id, user) {
@@ -53,4 +54,12 @@ async function cancelOrder(id, user) {
   return order;
 }
 
-module.exports = { listOrders, findOrder, createOrder, payOrder, cancelOrder };
+async function refundOrder(id, user, reason) {
+  if (!config.refundsEnabled) throw new BusinessError(messages.REFUNDS_ARE_OFF);
+  const order = await findOrder(id, user);
+  if (order.status !== 'paid') throw new BusinessError(messages.ORDER_NOT_PAID);
+  order.status = 'refunded';
+  return { id: order.id, status: order.status, refunded: order.total, reason };
+}
+
+module.exports = { listOrders, findOrder, createOrder, payOrder, cancelOrder, refundOrder };

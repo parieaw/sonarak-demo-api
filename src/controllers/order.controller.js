@@ -24,6 +24,11 @@ module.exports.orders = {
     return { result: { id: order.id, status: order.status, paidAt: new Date().toISOString() } };
   },
 
+  refund: async (req, res) => {
+    const result = await orderService.refundOrder(req.params.id, res.locals.user, req.body.reason);
+    return { result };
+  },
+
   cancel: async (req, res) => {
     const order = await orderService.cancelOrder(req.params.id, res.locals.user);
     return { result: { id: order.id, status: order.status } };

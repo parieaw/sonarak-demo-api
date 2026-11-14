@@ -85,7 +85,7 @@ test("orders: the session cookie, the CSRF header, validation and business failu
   assert.equal(list.json.status, true);
   assert.equal(list.json.msg, "SUCCESS");
   assert.ok(list.json.result.items.every((o) => o.status === "paid"));
-  assert.deepEqual(Object.keys(list.json.result), ["items", "page", "limit", "total"]);
+  assert.deepEqual(Object.keys(list.json.result), ["items", "page", "limit", "total", "hasMore"]);
   assert.equal((await staff.get("/api/orders?status=shipped")).status, 400);
   assert.equal((await staff.get("/api/orders/nope")).status, 400);
   assert.deepEqual((await staff.get("/api/orders/o_9999")).json, { status: false, msg: "ORDER_NOT_FOUND" });
@@ -187,4 +187,20 @@ test("signing in through the provider: a redirect a browser follows to the end",
   assert.deepEqual((await other.get(stolen.pathname + stolen.search)).json, { status: false, msg: "OAUTH_STATE_MISMATCH" });
   // and the provider only sends people back to this app
   assert.equal((await browser.get("/oauth/continue?as=u_admin&redirect_uri=https%3A%2F%2Fevil.example%2Fcb&state=x")).status, 400);
+});
+
+test("refunds: off until FEATURE_REFUNDS is set, then only for who may refund", async () => {
+  const config = require("../src/config");
+  const admin = await signedIn("admin@demo.test");
+  const staff = await signedIn("staff@demo.test");
+  const reason = { reason: "customer changed their mind" };
+  assert.deepEqual((await admin.post("/api/orders/o_1001/refund", { body: reason, headers: admin.csrf })).json, { status: false, msg: "REFUNDS_ARE_OFF" });
+  config.refundsEnabled = "1";
+  assert.equal((await staff.post("/api/orders/o_1001/refund", { body: reason, headers: staff.csrf })).status, 403);
+  assert.equal((await admin.post("/api/orders/o_1001/refund", { body: { reason: "no" }, headers: admin.csrf })).status, 400);
+  const done = await admin.post("/api/orders/o_1001/refund", { body: reason, headers: admin.csrf });
+  assert.deepEqual(done.json.result, { id: "o_1001", status: "refunded", refunded: 190, reason: reason.reason });
+  assert.deepEqual((await admin.post("/api/orders/o_1001/refund", { body: reason, headers: admin.csrf })).json, { status: false, msg: "ORDER_NOT_PAID" });
+  assert.equal((await admin.get("/api/orders?status=refunded")).json.result.hasMore, false);
+  config.refundsEnabled = undefined;
 });

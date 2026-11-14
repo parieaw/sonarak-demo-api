@@ -21,7 +21,7 @@ router.use(requireSession);
 router.get(
   '/',
   requirePermission('orders.read'),
-  query('status').optional().isIn(['pending', 'paid', 'cancelled']),
+  query('status').optional().isIn(['pending', 'paid', 'cancelled', 'refunded']),
   query('page').optional().isInt({ min: 1 }).toInt(),
   query('limit').optional().isInt({ min: 1, max: 100 }).toInt(),
   validate,
@@ -46,13 +46,23 @@ router.post(
   body('items').isArray({ min: 1, max: 10 }).withMessage('one to ten items'),
   body('items.*.productId').isString().notEmpty(),
   body('items.*.quantity').isInt({ min: 1, max: 20 }),
-  body('note').optional().isString().isLength({ max: 140 }),
+  body('note').optional().isString().isLength({ max: 280 }),
   validate,
   asyncHandler(orders.create),
 );
 
 // Mark an order as paid
 router.post('/:id/pay', requireCsrf, requirePermission('orders.write'), asyncHandler(orders.pay));
+
+// Give the money back for a paid order: only who has orders.refund
+router.post(
+  '/:id/refund',
+  requireCsrf,
+  requirePermission('orders.refund'),
+  body('reason').isString().isLength({ min: 5, max: 200 }).withMessage('say why, in 5 to 200 characters'),
+  validate,
+  asyncHandler(orders.refund),
+);
 
 // Cancel an order
 router.delete('/:id', requireCsrf, requirePermission('orders.write'), asyncHandler(orders.cancel));
