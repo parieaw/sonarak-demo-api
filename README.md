@@ -27,7 +27,7 @@ Three accounts, all with the password `demo1234`:
 ## Things to try in Sonarak
 
 1. **Routes from the code.** 22 routes appear with no setup. Open `POST /api/orders`: the body is filled in from the validation rules (`items` is one to ten, `quantity` is 1 to 20).
-2. **Sign in once.** Send `POST /api/auth/login`. Sonarak keeps the session cookie and the `accessToken`. `GET /api/auth/me` now works, and so does the admin area, which reads the token.
+2. **Sign in once.** Send `POST /api/auth/login`. Its body starts with the admin account, from the example in the route's docs. Sonarak keeps the session cookie and the `accessToken`. `GET /api/auth/me` now works, and so does the admin area, which reads the token.
 3. **CSRF without thinking about it.** `POST /api/orders` needs an `x-csrf-token` header that matches a cookie. Sonarak fetches it from `/api/auth/csrf` and adds it.
 4. **An error, traced to its line.** Sign out and send `GET /api/orders`: 401, with the line in `src/middlewares/auth.js` that sent it.
 5. **HTTP status and business status.** Order a `p_scone` (out of stock): the answer is HTTP 200 with `{ "status": false, "msg": "OUT_OF_STOCK" }`. Sonarak shows the two results apart.
