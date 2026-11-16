@@ -1,6 +1,7 @@
 const express = require('express');
 const cookies = require('./middlewares/cookies');
 const errorHandler = require('./middlewares/error.handler');
+const messages = require('./utils/messages');
 
 const app = express();
 
@@ -19,6 +20,9 @@ app.use('/api/products', require('./routes/product.routes'));
 app.use('/api/admin', require('./routes/admin.routes'));
 app.use('/api', require('./routes/misc.routes'));
 app.use(require('./routes/provider.routes'));
+
+// a route that does not exist answers in the same envelope as the rest
+app.use((req, res) => res.status(404).json({ status: false, msg: messages.ROUTE_NOT_FOUND }));
 
 app.use(errorHandler);
 

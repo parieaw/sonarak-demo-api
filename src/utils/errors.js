@@ -13,6 +13,13 @@ class BusinessError extends Error {
   }
 }
 
+/** Something wrong with what was sent: 400 */
+class BadRequestError extends BusinessError {
+  constructor(message = 'BAD_REQUEST') {
+    super(message, 400);
+  }
+}
+
 class NotFoundError extends BusinessError {
   constructor(message = 'NOT_FOUND') {
     super(message, 404);
@@ -31,4 +38,4 @@ class ForbiddenError extends BusinessError {
   }
 }
 
-module.exports = { BusinessError, NotFoundError, UnauthorizedError, ForbiddenError };
+module.exports = { BusinessError, BadRequestError, NotFoundError, UnauthorizedError, ForbiddenError };

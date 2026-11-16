@@ -16,7 +16,12 @@ router.post('/feedback', express.urlencoded({ extended: false }), (req, res) => 
   if (!message) {
     return res.status(400).json({ status: false, msg: 'MESSAGE_REQUIRED' });
   }
-  const entry = { id: db.feedback.length + 1, name: name || 'anonymous', message, rating: Number(rating) || null };
+  // the rating is optional, and when given it is a whole number from 1 to 5
+  const hasRating = rating !== undefined && rating !== '';
+  if (hasRating && !/^[1-5]$/.test(String(rating).trim())) {
+    return res.status(400).json({ status: false, msg: messages.RATING_OUT_OF_RANGE });
+  }
+  const entry = { id: db.feedback.length + 1, name: name || 'anonymous', message, rating: hasRating ? Number(rating) : null };
   db.feedback.push(entry);
   res.status(201).json({ status: true, result: entry });
 });

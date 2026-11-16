@@ -1,0 +1,43 @@
+{
+  "info": {
+    "name": "sonarak-demo-api",
+    "description": "A few of the demo's routes as a Postman collection, to try Sonarak's Import.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [{ "key": "baseUrl", "value": "http://localhost:4100" }],
+  "item": [
+    {
+      "name": "auth",
+      "item": [
+        {
+          "name": "Sign in",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/auth/login" },
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"admin@demo.test\",\n  \"password\": \"demo1234\"\n}", "options": { "raw": { "language": "json" } } }
+          }
+        },
+        { "name": "Who is signed in", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/auth/me" } } }
+      ]
+    },
+    {
+      "name": "menu",
+      "item": [
+        { "name": "The menu, in stock", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/products?inStock=true", "query": [{ "key": "inStock", "value": "true" }] } } }
+      ]
+    },
+    {
+      "name": "Send feedback",
+      "request": {
+        "method": "POST",
+        "url": { "raw": "{{baseUrl}}/api/feedback" },
+        "body": { "mode": "urlencoded", "urlencoded": [{ "key": "name", "value": "Ada" }, { "key": "message", "value": "Great latte" }, { "key": "rating", "value": "5" }] }
+      }
+    },
+    {
+      "name": "Admin users (bearer token)",
+      "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/admin/users" }, "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] } }
+    }
+  ]
+}
