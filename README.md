@@ -38,6 +38,16 @@ Three accounts, all with the password `demo1234`:
 10. **Check .env.** In the Server panel: three variables the code reads are not set (one of them, `FEATURE_REFUNDS`, is not even in `.env.example`), and one in the example is read nowhere. Each shows who added it.
 11. **Compare branches.** Compare with `feature/refunds`: one new route, and changes to two others.
 12. **From an AI agent.** With MCP on in Sonarak, ask Claude Code "which routes need the admin role?" or "why did my last request to /api/admin/reports/daily fail?".
+13. **Why the server didn't start.** Rename `node_modules` (or run Sonarak's Server panel before `npm install`) and press **Run**. Under the bar Sonarak says what went wrong, here "express is not installed", with a button that installs the packages and starts the server. Start the server twice (once in your own terminal) for "port 4100 is already in use".
+14. **The Terminal tab.** In the Server panel, switch **Log** to **Terminal**: your own shell in this folder. Run `npm install`, `git status`, anything.
+15. **Paste a curl command.** **+ Add** in the Endpoints list, then paste a command copied from a browser's developer tools (Copy as cURL), for example:
+    ```bash
+    curl 'http://localhost:4100/api/auth/login' -H 'content-type: application/json' --data-raw '{"email":"staff@demo.test","password":"demo1234"}'
+    ```
+    It becomes an endpoint with its headers and body.
+16. **A project without code.** **Add project › New without code…**, then **Import a collection**: pick `collections/openapi.json`, `collections/postman.json`, or the folder `collections/bruno`. The requests arrive with their bodies, and the base URL is set to `http://localhost:4100`.
+17. **Expect.** Open `POST /api/auth/login`, go to the **Expect** tab, add "Status is 200" and "Body value `user.role` equals `admin`". Send it: a green badge. Change the email to the guest account and send again: the badge says which check failed.
+18. **As code.** **Code ▾** beside **curl** copies the request as fetch, axios or Python requests, with the token and cookies Sonarak would send.
 
 ## What is where
 
@@ -55,6 +65,8 @@ Three accounts, all with the password `demo1234`:
 | `POST /api/feedback` | none | a urlencoded form |
 | `POST /api/webhooks/payment` | `x-api-key` | an API key, and a setting that is missing |
 | `GET /api/health` | none | the simplest one |
+
+`collections/` holds a few of these routes as an OpenAPI file, a Postman collection and a Bruno collection folder, to try importing (see 16).
 
 `/oauth/authorize`, `/oauth/continue` and `/signed-in` are pages of the pretend sign-in provider, for a browser.
 

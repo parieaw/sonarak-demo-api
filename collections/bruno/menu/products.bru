@@ -1,0 +1,15 @@
+meta {
+  name: The menu
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/products?inStock=true
+  body: none
+  auth: none
+}
+
+params:query {
+  inStock: true
+}

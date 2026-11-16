@@ -1,0 +1,17 @@
+meta {
+  name: Send feedback
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/feedback
+  body: formUrlEncoded
+  auth: none
+}
+
+body:form-urlencoded {
+  name: Ada
+  message: Great latte
+  rating: 5
+}

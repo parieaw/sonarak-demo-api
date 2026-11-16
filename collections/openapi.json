@@ -1,0 +1,41 @@
+{
+  "openapi": "3.0.3",
+  "info": { "title": "sonarak-demo-api", "version": "1.0.0", "description": "A few of the demo's routes, to try Sonarak's Import on a project without code." },
+  "servers": [{ "url": "http://localhost:4100" }],
+  "paths": {
+    "/api/health": { "get": { "summary": "Health check", "tags": ["misc"], "responses": { "200": { "description": "OK" } } } },
+    "/api/auth/login": {
+      "post": {
+        "summary": "Sign in",
+        "tags": ["auth"],
+        "requestBody": { "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Login" } } } },
+        "responses": { "200": { "description": "Signed in: a session cookie and an accessToken" } }
+      }
+    },
+    "/api/auth/me": { "get": { "summary": "Who is signed in", "tags": ["auth"], "responses": { "200": { "description": "OK" }, "401": { "description": "Not signed in" } } } },
+    "/api/products": {
+      "get": {
+        "summary": "The menu",
+        "tags": ["menu"],
+        "parameters": [{ "name": "inStock", "in": "query", "schema": { "type": "boolean", "example": true } }],
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+    "/api/feedback": {
+      "post": {
+        "summary": "Send feedback",
+        "tags": ["misc"],
+        "requestBody": { "content": { "application/x-www-form-urlencoded": { "schema": { "type": "object", "properties": { "name": { "type": "string", "example": "Ada" }, "message": { "type": "string", "example": "Great latte" }, "rating": { "type": "integer", "example": 5 } } } } } },
+        "responses": { "200": { "description": "OK" }, "400": { "description": "No message" } }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Login": {
+        "type": "object",
+        "properties": { "email": { "type": "string", "example": "admin@demo.test" }, "password": { "type": "string", "example": "demo1234" } }
+      }
+    }
+  }
+}
