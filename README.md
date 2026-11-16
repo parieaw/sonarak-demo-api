@@ -26,7 +26,7 @@ Three accounts, all with the password `demo1234`:
 
 ## Things to try in Sonarak
 
-1. **Routes from the code.** 22 routes appear with no setup. Open `POST /api/orders`: the body is filled in from the validation rules (`items` is one to ten, `quantity` is 1 to 20).
+1. **Routes from the code.** 24 routes appear with no setup. Open `POST /api/orders`: the body is filled in from the validation rules (`items` is one to ten, `quantity` is 1 to 20).
 2. **Sign in once.** Send `POST /api/auth/login`. Its body starts with the admin account, from the example in the route's docs. Sonarak keeps the session cookie and the `accessToken`. `GET /api/auth/me` now works, and so does the admin area, which reads the token.
 3. **CSRF without thinking about it.** `POST /api/orders` needs an `x-csrf-token` header that matches a cookie. Sonarak fetches it from `/api/auth/csrf` and adds it.
 4. **An error, traced to its line.** Sign out and send `GET /api/orders`: 401, with the line in `src/middlewares/auth.js` that sent it.
@@ -48,6 +48,7 @@ Three accounts, all with the password `demo1234`:
 16. **A project without code.** **Add project › New without code…**, then **Import a collection**: pick `collections/openapi.json`, `collections/postman.json`, or the folder `collections/bruno`. The requests arrive with their bodies, and the base URL is set to `http://localhost:4100`.
 17. **Expect.** Open `POST /api/auth/login`, go to the **Expect** tab, add "Status is 200" and "Body value `user.role` equals `admin`". Send it: a green badge. Change the email to the guest account and send again: the badge says which check failed.
 18. **As code.** **Code ▾** beside **curl** copies the request as fetch, axios or Python requests, with the token and cookies Sonarak would send.
+19. **Where the time went.** Start the server from Sonarak's Server panel, send `GET /api/products/prices`, and open **Timeline** beside Pretty: about 100 ms, nearly all of it three calls to the pricing service made one after another from `src/routes/product.routes.js`, one per product. Sonarak says the same call went out three times in one request. Press **Measure** for its typical and slow times; change the loop to `Promise.all` and measure again to see the difference.
 
 ## What is where
 
@@ -59,6 +60,7 @@ Three accounts, all with the password `demo1234`:
 | `GET /api/orders`, `GET /api/orders/:id` | cookie + `orders.read` | query validation, 404, 403 |
 | `POST /api/orders`, `POST /api/orders/:id/pay`, `DELETE /api/orders/:id` | cookie + CSRF + `orders.write` | body validation, business failures |
 | `GET /api/products` | none | an open route |
+| `GET /api/products/prices`, `GET /api/products/:id/price` | none | a slow route: one call per product (see 19) |
 | `POST /api/products/:id/image` | cookie + CSRF + `products.write` | multipart upload |
 | `GET /api/admin/users`, `GET /api/admin/reports/sales` | bearer token + admin | role guard |
 | `GET /api/admin/reports/daily` | bearer token + admin | a 500 with a stack trace |

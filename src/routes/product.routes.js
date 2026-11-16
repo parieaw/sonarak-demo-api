@@ -29,6 +29,27 @@ router.get('/', (req, res) => {
   res.json({ status: true, result: { items, total: items.length } });
 });
 
+// Today's prices: slow on purpose. It asks the pricing service once per product, one after another
+// (an N+1 over HTTP), which Sonarak's Timeline shows with the line below that makes the call.
+router.get(
+  '/prices',
+  asyncHandler(async (req, res) => {
+    const origin = `${req.protocol}://${req.get('host')}`;
+    const items = [];
+    for (const p of db.products) {
+      const r = await fetch(`${origin}/api/products/${p.id}/price`);
+      const { price } = await r.json();
+      items.push({ id: p.id, name: p.name, price });
+    }
+    return { result: { items, total: items.length } };
+  }),
+);
+
+// The pretend pricing service the route above calls: 25 ms per product
+router.get('/:id/price', findProduct, (req, res) => {
+  setTimeout(() => res.json({ id: res.locals.product.id, price: res.locals.product.price }), 25);
+});
+
 // A picture for a product: multipart, with the file in "image" and an optional "caption"
 router.post(
   '/:id/image',
